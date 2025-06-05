@@ -1,0 +1,46 @@
+import { cors } from '@elysiajs/cors';
+import swagger from '@elysiajs/swagger';
+import Elysia from 'elysia';
+
+export class MainServer {
+	app: Elysia;
+	port: number;
+
+	constructor() {
+		this.app = new Elysia();
+		this.port = parseInt(process.env['PORT'] ?? '4000');
+	}
+
+	public setup() {
+		this.app.use(cors()).get('/prueba', () => 'prueba');
+
+		if (process.env['ENABLE_SWAGGER'] === 'true') {
+			console.log('Swagger enabled.');
+
+			this.app.use(
+				swagger({
+					documentation: {
+						info: {
+							version: 'latest',
+							title: 'EVOGD Backend Docs',
+							description: 'EVOGD Backend Documentation'
+						}
+					},
+					swaggerOptions: {
+						syntaxHighlight: { activate: true, theme: 'monokai' }
+					},
+					path: '/docs',
+					exclude: /\/docs/
+				})
+			);
+		}
+
+		console.log('EVOGD Backend started.');
+	}
+
+	public listen() {
+		this.app.listen({ port: this.port, idleTimeout: 20 }, () => {
+			console.log('Listening on port', `http://localhost:${this.port}`);
+		});
+	}
+}
