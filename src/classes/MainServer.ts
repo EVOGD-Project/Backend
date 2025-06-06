@@ -1,6 +1,8 @@
 import { cors } from '@elysiajs/cors';
 import swagger from '@elysiajs/swagger';
 import Elysia from 'elysia';
+import { authLoginRoute } from '../routes/auth/login';
+import { authRegisterRoute } from '../routes/auth/register';
 
 export class MainServer {
 	app: Elysia;
@@ -12,7 +14,7 @@ export class MainServer {
 	}
 
 	public setup() {
-		this.app.use(cors()).get('/prueba', () => 'prueba');
+		this.app.use(cors()).use(authLoginRoute).use(authRegisterRoute);
 
 		if (process.env['ENABLE_SWAGGER'] === 'true') {
 			console.log('Swagger enabled.');
@@ -27,10 +29,18 @@ export class MainServer {
 						}
 					},
 					swaggerOptions: {
-						syntaxHighlight: { activate: true, theme: 'monokai' }
+						syntaxHighlight: { activate: true, theme: 'monokai' },
+
 					},
 					path: '/docs',
-					exclude: /\/docs/
+					exclude: /\/docs/,
+					scalarCDN: 'https://evogd-cdn.tnfangel.com/jsdist/scalar.min.js',
+					scalarConfig: {
+						servers: [{
+							description: 'EvoGD API',
+							url: 'https://evogd-api.tnfangel.com',
+						}]
+					}
 				})
 			);
 		}
