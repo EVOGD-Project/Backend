@@ -4,6 +4,7 @@ import swagger from '@elysiajs/swagger';
 import Elysia from 'elysia';
 import { authLoginRoute } from '../routes/auth/login';
 import { authRegisterRoute } from '../routes/auth/register';
+import { userRoute } from '../routes/user';
 
 export class MainServer {
 	app: Elysia;
@@ -15,7 +16,7 @@ export class MainServer {
 	}
 
 	public setup() {
-		this.app.use(cors()).use(staticPlugin()).use(authLoginRoute).use(authRegisterRoute);
+		this.app.use(cors()).use(staticPlugin()).use(authLoginRoute).use(authRegisterRoute).use(userRoute);
 
 		if (process.env['ENABLE_SWAGGER'] === 'true') {
 			console.log('Swagger enabled.');
