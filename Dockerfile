@@ -19,6 +19,8 @@ ENV GIT_COMMIT=$GIT_COMMIT
 ENV PORT=4000
 
 COPY --from=builder /build/dist/backend ./
+COPY --from=builder /build/public ./
+
 
 EXPOSE 4000/tcp
 
