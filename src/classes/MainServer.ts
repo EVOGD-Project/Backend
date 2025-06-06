@@ -29,10 +29,18 @@ export class MainServer {
 						}
 					},
 					swaggerOptions: {
-						syntaxHighlight: { activate: true, theme: 'monokai' }
+						syntaxHighlight: { activate: true, theme: 'monokai' },
+
 					},
 					path: '/docs',
-					exclude: /\/docs/
+					exclude: /\/docs/,
+					scalarCDN: 'https://evogd-cdn.tnfangel.com/jsdist/scalar.min.js',
+					scalarConfig: {
+						servers: [{
+							description: 'EvoGD API',
+							url: 'https://evogd-api.tnfangel.com',
+						}]
+					}
 				})
 			);
 		}
