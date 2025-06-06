@@ -23,7 +23,7 @@ export const userRoute = new Elysia({
 				id: user._id.toString(),
 				username: user.username,
 				email: user.email,
-				avatarURL: user.avatarURL
+				avatar: user.avatar
 			};
 		},
 		{

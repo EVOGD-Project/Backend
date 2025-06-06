@@ -6,7 +6,8 @@ const schema = new Schema(
 		token: {
 			type: String,
 			required: true,
-			unique: false
+			unique: true,
+			index: true
 		},
 		username: { type: String, required: true, trim: true },
 		email: {
@@ -17,7 +18,7 @@ const schema = new Schema(
 			trim: true
 		},
 		password: { type: String, required: true },
-		avatarURL: { type: String, required: false, trim: true }
+		avatar: { type: String, required: false, trim: true }
 	},
 	{
 		statics: {
