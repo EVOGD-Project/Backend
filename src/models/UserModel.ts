@@ -18,19 +18,17 @@ const schema = new Schema(
 			trim: true
 		},
 		password: { type: String, required: true },
-		avatar: { type: String, required: false, trim: true }
+		avatar: { type: String, required: false, trim: true },
+		classroomIds: {
+			type: [String],
+			required: false,
+			default: []
+		}
 	},
 	{
 		statics: {
 			async verifyPassword(password: string, hash: string) {
 				return Bun.password.verify(password, hash);
-			},
-			async findByToken(id: string, auth: string) {
-				const targetUser = await this.findById(id);
-
-				if (!targetUser?.token || targetUser.token !== auth) return null;
-
-				return targetUser;
 			}
 		}
 	}
