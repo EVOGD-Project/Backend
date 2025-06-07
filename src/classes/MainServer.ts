@@ -4,9 +4,9 @@ import swagger from '@elysiajs/swagger';
 import Elysia from 'elysia';
 import { authLoginRoute } from '../routes/auth/login';
 import { authRegisterRoute } from '../routes/auth/register';
-import { classroomRoute } from '../routes/classroom';
-import { userRoute } from '../routes/user';
+import { classroomsRoute } from '../routes/classroom';
 import { classroomActivitiesRoute } from '../routes/classroom/activities';
+import { userRoute } from '../routes/user';
 
 export class MainServer {
 	app: Elysia;
@@ -24,7 +24,7 @@ export class MainServer {
 			.use(authLoginRoute)
 			.use(authRegisterRoute)
 			.use(userRoute)
-			.use(classroomRoute)
+			.use(classroomsRoute)
 			.use(classroomActivitiesRoute);
 
 		if (process.env['ENABLE_SWAGGER'] === 'true') {

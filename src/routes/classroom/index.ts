@@ -4,9 +4,9 @@ import { UserModel } from '../../models/UserModel';
 import { headersPlugin } from '../../plugins/headers';
 import { generateClassroomCode } from '../../util/generateClassroomCode';
 
-export const classroomRoute = new Elysia({
+export const classroomsRoute = new Elysia({
 	name: 'routes:classroomRoute',
-	prefix: '/classroom'
+	prefix: '/classrooms'
 })
 	.use(headersPlugin)
 	.post(
@@ -32,7 +32,7 @@ export const classroomRoute = new Elysia({
 
 			await UserModel.findOneAndUpdate({ token }, { $addToSet: { classroomIds: save._id.toString() } }).exec();
 
-			return save;
+			return { id: save.id };
 		},
 		{
 			parse: 'json',
@@ -138,7 +138,7 @@ export const classroomRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return save;
+			return { id: save.id };
 		},
 		{
 			parse: 'json',
