@@ -5,8 +5,8 @@ import { UserModel } from '../../../models/UserModel';
 import { headersPlugin } from '../../../plugins/headers';
 
 export const classroomActivitiesRoute = new Elysia({
-    name: 'routes:classroomActivitiesRoute',
-    prefix: '/classroom/:id/activities'
+	name: 'routes:classroomActivitiesRoute',
+	prefix: '/classrooms/:id/activities'
 })
 	.use(headersPlugin)
 	.get(
@@ -73,7 +73,7 @@ export const classroomActivitiesRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return save;
+			return { id: save.id };
 		},
 		{
 			parse: 'json',
@@ -170,7 +170,7 @@ export const classroomActivitiesRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return save;
+			return { id: save.id };
 		},
 		{
 			parse: 'json',
