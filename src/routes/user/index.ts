@@ -10,9 +10,12 @@ export const userRoute = new Elysia({
 	.get(
 		'/',
 		async ({ status, token }) => {
-			const user = await UserModel.findOne({
-				token: token
-			})
+			const user = await UserModel.findOne(
+				{
+					token: token
+				},
+				{ __v: 0 }
+			)
 				.lean()
 				.exec()
 				.catch(() => null);
@@ -23,7 +26,8 @@ export const userRoute = new Elysia({
 				id: user._id.toString(),
 				username: user.username,
 				email: user.email,
-				avatar: user.avatar
+				avatar: user.avatar,
+				classroomIds: user.classroomIds
 			};
 		},
 		{

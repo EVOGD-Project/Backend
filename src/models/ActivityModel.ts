@@ -1,12 +1,11 @@
-import { Schema, model } from 'mongoose';
-import { SchemaUtil } from '../classes/SchemaUtil';
+import { Schema, Types, model } from 'mongoose';
 
 export interface IActivity {
 	id: string;
 	title: string;
 	description: string;
 	classroomId: string;
-	owner: string;
+	owner: Types.ObjectId;
 	dueDate?: string;
 	createdAt: string;
 	type: 'assignment' | 'material';
@@ -41,6 +40,12 @@ const resourceSchema = new Schema(
 
 const activitySchema = new Schema<IActivity>(
 	{
+		owner: {
+			type: Schema.Types.ObjectId,
+			ref: 'user',
+			required: true,
+			index: true
+		},
 		title: {
 			type: String,
 			required: true
@@ -50,10 +55,6 @@ const activitySchema = new Schema<IActivity>(
 			required: true
 		},
 		classroomId: {
-			type: String,
-			required: true
-		},
-		owner: {
 			type: String,
 			required: true
 		},
@@ -82,9 +83,5 @@ const activitySchema = new Schema<IActivity>(
 		timestamps: true
 	}
 );
-
-activitySchema.set('toJSON', {
-	transform: SchemaUtil.transformSchemaToJSON
-});
 
 export const ActivityModel = model<IActivity>('Activity', activitySchema);

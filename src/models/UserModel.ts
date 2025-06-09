@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose';
-import { SchemaUtil } from '../classes/SchemaUtil';
 
 const schema = new Schema(
 	{
@@ -20,7 +19,14 @@ const schema = new Schema(
 		password: { type: String, required: true },
 		avatar: { type: String, required: false, trim: true },
 		classroomIds: {
-			type: [String],
+			type: [
+				{
+					type: Schema.Types.ObjectId,
+					ref: 'classroom',
+					required: true,
+					index: true
+				}
+			],
 			required: false,
 			default: []
 		}
@@ -50,10 +56,6 @@ schema.pre('save', async function (next) {
 	} catch (err: any) {
 		return next(err);
 	}
-});
-
-schema.set('toJSON', {
-	transform: SchemaUtil.transformSchemaToJSON
 });
 
 export const UserModel = model('user', schema);
