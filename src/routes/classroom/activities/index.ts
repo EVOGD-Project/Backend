@@ -20,7 +20,7 @@ export const classroomActivitiesRoute = new Elysia({
 			if (!user) return status(400, 'Bad Request');
 			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const activities = await ActivityModel.find({ classroomId: classroomId }, { __v: 0 })
+			const activities = await ActivityModel.find({ classroom: classroomId }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
@@ -66,7 +66,7 @@ export const classroomActivitiesRoute = new Elysia({
 			const activity = new ActivityModel({
 				title,
 				description,
-				classroomId: classroomId,
+				classroom: classroomId,
 				type,
 				content,
 				dueDate,
@@ -124,7 +124,7 @@ export const classroomActivitiesRoute = new Elysia({
 			const activity = await ActivityModel.findOne(
 				{
 					_id: activityId,
-					classroomId
+					classroom: classroomId
 				},
 				{ __v: 0 }
 			)
@@ -163,7 +163,7 @@ export const classroomActivitiesRoute = new Elysia({
 			const activity = await ActivityModel.findOne(
 				{
 					_id: activityId,
-					classroomId
+					classroom: classroomId
 				},
 				{ __v: 0 }
 			)
