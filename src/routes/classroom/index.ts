@@ -9,12 +9,45 @@ export const classroomsRoute = new Elysia({
 	prefix: '/classrooms'
 })
 	.use(headersPlugin)
+	.get('/', async ({ status, token }) => {
+		const user = await UserModel.findOne({ token }, { __v: 0 })
+			.lean()
+			.exec()
+			.catch(() => null);
+
+		if (!user) return status(400, 'Bad Request');
+
+		const classrooms = await ClassroomModel.find(
+			{
+				_id: { $in: user.classroomIds }
+			},
+			{ __v: 0 }
+		)
+			.lean()
+			.exec()
+			.catch(() => null);
+
+		if (!classrooms) return status(400, 'Bad Request');
+
+		return classrooms.map((classroom) => ({
+			...classroom,
+			id: classroom._id.toString(),
+			_id: undefined
+		}));
+	})
 	.post(
 		'/',
 		async ({ body, status, token }) => {
 			if (!body) return status(400, 'Bad Request');
 
 			const { name, description, thumbnailId } = body;
+
+			const user = await UserModel.findOne({ token }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!user) return status(400, 'Bad Request');
 
 			const code = generateClassroomCode();
 
@@ -23,16 +56,18 @@ export const classroomsRoute = new Elysia({
 				description,
 				thumbnailId,
 				code,
-				owner: token
+				owner: user._id
 			});
 
 			const save = await classroom.save().catch(() => null);
 
 			if (!save) return status(400, 'Bad Request');
 
-			await UserModel.findOneAndUpdate({ token }, { $addToSet: { classroomIds: save._id.toString() } }).exec();
+			await UserModel.updateOne({ token }, { $addToSet: { classroomIds: save._id } })
+				.lean()
+				.exec();
 
-			return { id: save.id };
+			return { id: save._id.toString() };
 		},
 		{
 			parse: 'json',
@@ -49,84 +84,53 @@ export const classroomsRoute = new Elysia({
 		}
 	)
 	.get(
-		'/join/:code',
-		async ({ params: { code }, status, token }) => {
-			const classroom = await ClassroomModel.findOne({ code })
-				.lean()
-				.exec()
-				.catch(() => null);
-
-			if (!classroom) return status(404, 'Classroom not found');
-
-			await UserModel.findOneAndUpdate(
-				{ token },
-				{ $addToSet: { classroomIds: classroom._id.toString() } }
-			).exec();
-
-			return classroom;
-		},
-		{
-			params: t.Object({
-				code: t.String({ minLength: 1 })
-			})
-		}
-	)
-	.get('/', async ({ status, token }) => {
-		const user = await UserModel.findOne({ token })
-			.lean()
-			.exec()
-			.catch(() => null);
-
-		if (!user) return status(400, 'Bad Request');
-
-		const classrooms = await ClassroomModel.find({
-			_id: { $in: user.classroomIds }
-		})
-			.lean()
-			.exec()
-			.catch(() => null);
-
-		if (!classrooms) return status(400, 'Bad Request');
-
-		return classrooms;
-	})
-	.get(
-		'/:id',
-		async ({ params: { id }, status, token }) => {
-			const user = await UserModel.findOne({ token })
+		'/:classroomId',
+		async ({ params: { classroomId }, status, token }) => {
+			const user = await UserModel.findOne({ token }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.includes(id)) return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const classroom = await ClassroomModel.findById(id)
+			const classroom = await ClassroomModel.findById(classroomId, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!classroom) return status(404, 'Classroom not found');
 
-			return classroom;
+			return {
+				...classroom,
+				id: classroom._id.toString(),
+				_id: undefined
+			};
 		},
 		{
 			params: t.Object({
-				id: t.String({ minLength: 1 })
+				classroomId: t.String({ minLength: 1 })
 			})
 		}
 	)
 	.put(
-		'/:id',
-		async ({ body, params: { id }, status, token }) => {
+		'/:classroomId',
+		async ({ body, params: { classroomId }, status, token }) => {
 			if (!body) return status(400, 'Bad Request');
 
-			const classroom = await ClassroomModel.findById(id)
+			const user = await UserModel.findOne({ token }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!user) return status(400, 'Bad Request');
+
+			const classroom = await ClassroomModel.findById(classroomId, { __v: 0 })
 				.exec()
 				.catch(() => null);
 
 			if (!classroom) return status(404, 'Classroom not found');
-			if (classroom.owner !== token) return status(403, 'Forbidden');
+			if (classroom.owner.toString() !== user._id.toString()) return status(403, 'Forbidden');
 
 			const { name, description, thumbnailId } = body;
 
@@ -138,12 +142,12 @@ export const classroomsRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return { id: save.id };
+			return { id: save._id.toString() };
 		},
 		{
 			parse: 'json',
 			params: t.Object({
-				id: t.String({ minLength: 1 })
+				classroomId: t.String({ minLength: 1 })
 			}),
 			body: t.Object(
 				{
@@ -155,5 +159,35 @@ export const classroomsRoute = new Elysia({
 					additionalProperties: false
 				}
 			)
+		}
+	)
+	.post(
+		'/join/:code',
+		async ({ params: { code }, status, token }) => {
+			const classroom = await ClassroomModel.findOne({ code }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!classroom) return status(404, 'Classroom not found');
+
+			await UserModel.updateOne(
+				{ token },
+				{ $addToSet: { classroomIds: classroom._id } },
+				{ projection: { __v: 0 } }
+			)
+				.lean()
+				.exec();
+
+			return {
+				...classroom,
+				id: classroom._id.toString(),
+				_id: undefined
+			};
+		},
+		{
+			params: t.Object({
+				code: t.String({ minLength: 1, maxLength: 16 })
+			})
 		}
 	);

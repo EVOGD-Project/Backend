@@ -11,7 +11,7 @@ export const authLoginRoute = new Elysia({
 
 		const { email, password } = body;
 
-		const user = await UserModel.findOne({ email })
+		const user = await UserModel.findOne({ email }, { __v: 0 })
 			.lean()
 			.exec()
 			.catch(() => null);

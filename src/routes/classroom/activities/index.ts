@@ -6,66 +6,71 @@ import { headersPlugin } from '../../../plugins/headers';
 
 export const classroomActivitiesRoute = new Elysia({
 	name: 'routes:classroomActivitiesRoute',
-	prefix: '/classrooms/:id/activities'
+	prefix: '/classrooms/:classroomId/activities'
 })
 	.use(headersPlugin)
 	.get(
 		'/',
-		async ({ params: { id }, status, token }) => {
-			const user = await UserModel.findOne({ token })
+		async ({ params: { classroomId }, status, token }) => {
+			const user = await UserModel.findOne({ token }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.includes(id)) return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const activities = await ActivityModel.find({ classroomId: id })
+			const activities = await ActivityModel.find({ classroomId: classroomId }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!activities) return status(400, 'Bad Request');
 
-			return activities;
+			return activities.map((activity) => ({
+				...activity,
+				id: activity._id.toString(),
+				content: { ...activity.content, instructions: undefined },
+				_id: undefined
+			}));
 		},
 		{
 			params: t.Object({
-				id: t.String({ minLength: 1 })
+				classroomId: t.String({ minLength: 1 })
 			})
 		}
 	)
 	.post(
 		'/',
-		async ({ body, params: { id }, status, token }) => {
+		async ({ body, params: { classroomId }, status, token }) => {
 			if (!body) return status(400, 'Bad Request');
 
-			const user = await UserModel.findOne({ token })
+			const user = await UserModel.findOne({ token }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.includes(id)) return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const classroom = await ClassroomModel.findById(id)
+			const classroom = await ClassroomModel.findById(classroomId, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!classroom) return status(404, 'Classroom not found');
-			if (classroom.owner !== token) return status(403, 'Forbidden');
+			if (classroom.owner.toString() !== user._id.toString()) return status(403, 'Forbidden');
 
 			const { title, description, type, content, dueDate } = body;
 
 			const activity = new ActivityModel({
 				title,
 				description,
-				classroomId: id,
+				classroomId: classroomId,
 				type,
 				content,
 				dueDate,
-				owner: token,
+				owner: user._id,
 				createdAt: new Date().toISOString()
 			});
 
@@ -73,12 +78,12 @@ export const classroomActivitiesRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return { id: save.id };
+			return { id: save._id.toString() };
 		},
 		{
 			parse: 'json',
 			params: t.Object({
-				id: t.String({ minLength: 1 })
+				classroomId: t.String({ minLength: 1 })
 			}),
 			body: t.Object(
 				{
@@ -108,25 +113,32 @@ export const classroomActivitiesRoute = new Elysia({
 	.get(
 		'/:activityId',
 		async ({ params: { classroomId, activityId }, status, token }) => {
-			const user = await UserModel.findOne({ token })
+			const user = await UserModel.findOne({ token }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.includes(classroomId)) return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const activity = await ActivityModel.findOne({
-				_id: activityId,
-				classroomId
-			})
+			const activity = await ActivityModel.findOne(
+				{
+					_id: activityId,
+					classroomId
+				},
+				{ __v: 0 }
+			)
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!activity) return status(404, 'Activity not found');
 
-			return activity;
+			return {
+				...activity,
+				id: activity._id.toString(),
+				_id: undefined
+			};
 		},
 		{
 			params: t.Object({
@@ -140,23 +152,26 @@ export const classroomActivitiesRoute = new Elysia({
 		async ({ body, params: { classroomId, activityId }, status, token }) => {
 			if (!body) return status(400, 'Bad Request');
 
-			const user = await UserModel.findOne({ token })
+			const user = await UserModel.findOne({ token }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.includes(classroomId)) return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const activity = await ActivityModel.findOne({
-				_id: activityId,
-				classroomId
-			})
+			const activity = await ActivityModel.findOne(
+				{
+					_id: activityId,
+					classroomId
+				},
+				{ __v: 0 }
+			)
 				.exec()
 				.catch(() => null);
 
 			if (!activity) return status(404, 'Activity not found');
-			if (activity.owner !== token) return status(403, 'Forbidden');
+			if (activity.owner.toString() !== user._id.toString()) return status(403, 'Forbidden');
 
 			const { title, description, type, content, dueDate } = body;
 
@@ -170,7 +185,7 @@ export const classroomActivitiesRoute = new Elysia({
 
 			if (!save) return status(400, 'Bad Request');
 
-			return { id: save.id };
+			return { id: save._id.toString() };
 		},
 		{
 			parse: 'json',

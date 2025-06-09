@@ -1,5 +1,4 @@
-import { Schema, model } from 'mongoose';
-import { SchemaUtil } from '../classes/SchemaUtil';
+import { Schema, Types, model } from 'mongoose';
 
 export interface IClassroom {
 	id: string;
@@ -7,11 +6,17 @@ export interface IClassroom {
 	description: string;
 	thumbnailId: number;
 	code: string;
-	owner: string;
+	owner: Types.ObjectId;
 }
 
 const schema = new Schema<IClassroom>(
 	{
+		owner: {
+			type: Schema.Types.ObjectId,
+			ref: 'user',
+			required: true,
+			index: true
+		},
 		name: {
 			type: String,
 			required: true
@@ -29,20 +34,11 @@ const schema = new Schema<IClassroom>(
 			required: true,
 			unique: true,
 			index: true
-		},
-		owner: {
-			type: String,
-			required: true,
-			index: true
 		}
 	},
 	{
 		timestamps: true
 	}
 );
-
-schema.set('toJSON', {
-	transform: SchemaUtil.transformSchemaToJSON
-});
 
 export const ClassroomModel = model<IClassroom>('Classroom', schema);
