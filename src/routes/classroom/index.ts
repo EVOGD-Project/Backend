@@ -234,4 +234,41 @@ export const classroomsRoute = new Elysia({
 				classroomId: t.String({ minLength: 1 })
 			})
 		}
+	)
+	.get(
+		'/:classroomId/professor',
+		async ({ params: { classroomId }, status, token }) => {
+			const user = await UserModel.findOne({ token }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!user) return status(400, 'Bad Request');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
+
+			const classroom = await ClassroomModel.findById(classroomId)
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!classroom) return status(404, 'Classroom not found');
+
+			const professor = await UserModel.findById(classroom.owner, { password: 0, token: 0, __v: 0, classroomIds: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!professor) return status(404, 'Professor not found');
+
+			return {
+				...professor,
+				id: professor._id.toString(),
+				_id: undefined
+			};
+		},
+		{
+			params: t.Object({
+				classroomId: t.String({ minLength: 1 })
+			})
+		}
 	);
