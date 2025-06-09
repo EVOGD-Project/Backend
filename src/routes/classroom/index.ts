@@ -200,4 +200,38 @@ export const classroomsRoute = new Elysia({
 				code: t.String({ minLength: 1, maxLength: 16 })
 			})
 		}
+	)
+	.get(
+		'/:classroomId/members',
+		async ({ params: { classroomId }, status, token }) => {
+			const user = await UserModel.findOne({ token }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!user) return status(400, 'Bad Request');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
+
+			const members = await UserModel.find(
+				{ classroomIds: classroomId },
+				{ password: 0, token: 0, __v: 0 }
+			)
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!members) return status(404, 'Members not found');
+
+			return members.map((member) => ({
+				...member,
+				id: member._id.toString(),
+				_id: undefined,
+				classroomIds: undefined
+			}));
+		},
+		{
+			params: t.Object({
+				classroomId: t.String({ minLength: 1 })
+			})
+		}
 	);
