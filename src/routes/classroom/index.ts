@@ -176,10 +176,10 @@ export const classroomsRoute = new Elysia({
 				.exec()
 				.catch(() => null);
 
-			if (user.classroomIds?.some((cId) => cId.toString() === classroom?._id.toString()))
-				return status(403, 'Forbidden');
-
 			if (!classroom) return status(404, 'Classroom not found');
+
+			if (user.classroomIds?.some((cId) => cId.toString() === classroom._id.toString()))
+				return status(403, 'Forbidden');
 
 			await UserModel.updateOne(
 				{ token },
