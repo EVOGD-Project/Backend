@@ -18,8 +18,7 @@ export const classroomActivitiesRoute = new Elysia({
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId))
-				return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
 			const activities = await ActivityModel.find({ classroomId: classroomId }, { __v: 0 })
 				.lean()
@@ -52,8 +51,7 @@ export const classroomActivitiesRoute = new Elysia({
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId))
-				return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
 			const classroom = await ClassroomModel.findById(classroomId, { __v: 0 })
 				.lean()
@@ -121,8 +119,7 @@ export const classroomActivitiesRoute = new Elysia({
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId))
-				return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
 			const activity = await ActivityModel.findOne(
 				{
@@ -161,8 +158,7 @@ export const classroomActivitiesRoute = new Elysia({
 				.catch(() => null);
 
 			if (!user) return status(400, 'Bad Request');
-			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId))
-				return status(403, 'Forbidden');
+			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
 			const activity = await ActivityModel.findOne(
 				{
