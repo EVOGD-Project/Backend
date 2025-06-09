@@ -164,10 +164,20 @@ export const classroomsRoute = new Elysia({
 	.post(
 		'/join/:code',
 		async ({ params: { code }, status, token }) => {
+			const user = await UserModel.findOne({ token }, { __v: 0 })
+				.lean()
+				.exec()
+				.catch(() => null);
+
+			if (!user) return status(400, 'Bad Request');
+
 			const classroom = await ClassroomModel.findOne({ code }, { __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
+
+			if (user.classroomIds?.some((cId) => cId.toString() === classroom?._id.toString()))
+				return status(403, 'Forbidden');
 
 			if (!classroom) return status(404, 'Classroom not found');
 
