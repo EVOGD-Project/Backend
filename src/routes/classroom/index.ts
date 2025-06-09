@@ -189,9 +189,19 @@ export const classroomsRoute = new Elysia({
 				.lean()
 				.exec();
 
+			const updatedClassroom = await ClassroomModel.findOneAndUpdate(
+				{ _id: classroom._id },
+				{ $inc: { memberCount: 1 } },
+				{ new: true, projection: { __v: 0 } }
+			)
+				.lean()
+				.exec();
+
+			if (!updatedClassroom) return status(400, 'Bad Request');
+
 			return {
-				...classroom,
-				id: classroom._id.toString(),
+				...updatedClassroom,
+				id: updatedClassroom._id.toString(),
 				_id: undefined
 			};
 		},
@@ -212,10 +222,7 @@ export const classroomsRoute = new Elysia({
 			if (!user) return status(400, 'Bad Request');
 			if (!user.classroomIds?.some((cId) => cId.toString() === classroomId)) return status(403, 'Forbidden');
 
-			const members = await UserModel.find(
-				{ classroomIds: classroomId },
-				{ password: 0, token: 0, __v: 0 }
-			)
+			const members = await UserModel.find({ classroomIds: classroomId }, { password: 0, token: 0, __v: 0 })
 				.lean()
 				.exec()
 				.catch(() => null);
@@ -253,7 +260,12 @@ export const classroomsRoute = new Elysia({
 
 			if (!classroom) return status(404, 'Classroom not found');
 
-			const professor = await UserModel.findById(classroom.owner, { password: 0, token: 0, __v: 0, classroomIds: 0 })
+			const professor = await UserModel.findById(classroom.owner, {
+				password: 0,
+				token: 0,
+				__v: 0,
+				classroomIds: 0
+			})
 				.lean()
 				.exec()
 				.catch(() => null);

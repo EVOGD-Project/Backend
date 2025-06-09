@@ -7,6 +7,7 @@ export interface IClassroom {
 	thumbnailId: number;
 	code: string;
 	owner: Types.ObjectId;
+	memberCount: number;
 }
 
 const schema = new Schema<IClassroom>(
@@ -34,6 +35,11 @@ const schema = new Schema<IClassroom>(
 			required: true,
 			unique: true,
 			index: true
+		},
+		memberCount: {
+			type: Number,
+			required: true,
+			default: 1
 		}
 	},
 	{
