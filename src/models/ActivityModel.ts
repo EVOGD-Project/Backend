@@ -2,10 +2,10 @@ import { Schema, Types, model } from 'mongoose';
 
 export interface IActivity {
 	id: string;
+	owner: Types.ObjectId;
+	classroom: Types.ObjectId;
 	title: string;
 	description: string;
-	classroomId: string;
-	owner: Types.ObjectId;
 	dueDate?: string;
 	createdAt: string;
 	type: 'assignment' | 'material';
@@ -46,15 +46,17 @@ const activitySchema = new Schema<IActivity>(
 			required: true,
 			index: true
 		},
+		classroom: {
+			type: Schema.Types.ObjectId,
+			ref: 'classroom',
+			required: true,
+			index: true
+		},
 		title: {
 			type: String,
 			required: true
 		},
 		description: {
-			type: String,
-			required: true
-		},
-		classroomId: {
 			type: String,
 			required: true
 		},
