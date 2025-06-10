@@ -63,6 +63,8 @@ export const classroomActivitiesRoute = new Elysia({
 
 			const { title, description, type, content, dueDate } = body;
 
+			if (content.resources?.some((r) => !r.url.startsWith('https://'))) return status(403, 'Forbidden');
+
 			const activity = new ActivityModel({
 				title,
 				description,
@@ -174,6 +176,8 @@ export const classroomActivitiesRoute = new Elysia({
 			if (activity.owner.toString() !== user._id.toString()) return status(403, 'Forbidden');
 
 			const { title, description, type, content, dueDate } = body;
+
+			if (content.resources?.some((r) => !r.url.startsWith('https://'))) return status(403, 'Forbidden');
 
 			activity.title = title;
 			activity.description = description;
