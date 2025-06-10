@@ -53,7 +53,11 @@ export const userRoute = new Elysia({
 
 			const avatarId = generateAvatarId();
 
-			const url = await minio.presignedPutObject('avatars', `${user._id.toString()}/${avatarId}.png`);
+			const url = await minio.presignedPutObject(
+				'avatars',
+				`${user._id.toString()}/${avatarId}.png`,
+				1 * 60 * 60
+			);
 
 			if (!url) return status(400, 'Error');
 
