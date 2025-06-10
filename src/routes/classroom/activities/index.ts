@@ -89,8 +89,8 @@ export const classroomActivitiesRoute = new Elysia({
 			}),
 			body: t.Object(
 				{
-					title: t.String({ minLength: 1, maxLength: 256 }),
-					description: t.String({ minLength: 1, maxLength: 1024 }),
+					title: t.String({ minLength: 1, maxLength: 64 }),
+					description: t.String({ minLength: 1, maxLength: 256 }),
 					type: t.Union([t.Literal('assignment'), t.Literal('material')]),
 					dueDate: t.Optional(t.String()),
 					content: t.Object({
@@ -199,8 +199,8 @@ export const classroomActivitiesRoute = new Elysia({
 			}),
 			body: t.Object(
 				{
-					title: t.String({ minLength: 1, maxLength: 256 }),
-					description: t.String({ minLength: 1, maxLength: 1024 }),
+					title: t.String({ minLength: 1, maxLength: 64 }),
+					description: t.String({ minLength: 1, maxLength: 256 }),
 					type: t.Union([t.Literal('assignment'), t.Literal('material')]),
 					dueDate: t.Optional(t.String()),
 					content: t.Object({
