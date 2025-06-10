@@ -6,6 +6,7 @@ import { authLoginRoute } from '../routes/auth/login';
 import { authRegisterRoute } from '../routes/auth/register';
 import { classroomsRoute } from '../routes/classroom';
 import { classroomActivitiesRoute } from '../routes/classroom/activities';
+import { classroomActivitySubmissionsRoute } from '../routes/classroom/activities/submissions';
 import { userRoute } from '../routes/user';
 
 export class MainServer {
@@ -25,7 +26,8 @@ export class MainServer {
 			.use(authRegisterRoute)
 			.use(userRoute)
 			.use(classroomsRoute)
-			.use(classroomActivitiesRoute);
+			.use(classroomActivitiesRoute)
+			.use(classroomActivitySubmissionsRoute);
 
 		if (process.env['ENABLE_SWAGGER'] === 'true') {
 			console.log('Swagger enabled.');
