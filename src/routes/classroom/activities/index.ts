@@ -98,7 +98,7 @@ export const classroomActivitiesRoute = new Elysia({
 								t.Object({
 									type: t.Union([t.Literal('link'), t.Literal('file')]),
 									name: t.String({ minLength: 1 }),
-									url: t.String({ minLength: 1 })
+									url: t.String({ minLength: 1, format: 'uri' })
 								})
 							)
 						)
