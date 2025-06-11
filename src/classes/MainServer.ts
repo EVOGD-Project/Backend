@@ -11,7 +11,7 @@ import { classroomActivitiesRoute } from '../routes/classroom/activities';
 import { classroomActivitySubmissionsRoute } from '../routes/classroom/activities/submissions';
 import { userRoute } from '../routes/user';
 
-const metricsToken = process.env['METRICS_TOKEN'];
+const metricsToken = process.env['METRICS_TOKEN']?.replace('=', '');;
 
 export class MainServer {
 	app: Elysia;
@@ -34,7 +34,7 @@ export class MainServer {
 			.use(classroomActivitiesRoute)
 			.use(classroomActivitySubmissionsRoute)
 			.get('/metrics', async ({ request, status }) => {
-				const auth = request.headers.get('authorization');
+				const auth = request.headers.get('authorization')?.replace('=', '');
 				const expected = 'Basic ' + metricsToken;
 
 				if (auth !== expected) return status(400);
