@@ -2,12 +2,16 @@ import { cors } from '@elysiajs/cors';
 import { staticPlugin } from '@elysiajs/static';
 import swagger from '@elysiajs/swagger';
 import Elysia from 'elysia';
+import { register } from 'prom-client';
+import { metricsPlugin } from '../plugins/metricsPlugin';
 import { authLoginRoute } from '../routes/auth/login';
 import { authRegisterRoute } from '../routes/auth/register';
 import { classroomsRoute } from '../routes/classroom';
 import { classroomActivitiesRoute } from '../routes/classroom/activities';
 import { classroomActivitySubmissionsRoute } from '../routes/classroom/activities/submissions';
 import { userRoute } from '../routes/user';
+
+const metricsToken = process.env['METRICS_TOKEN'];
 
 export class MainServer {
 	app: Elysia;
@@ -22,12 +26,23 @@ export class MainServer {
 		this.app
 			.use(cors())
 			.use(staticPlugin())
+			.use(metricsPlugin)
 			.use(authLoginRoute)
 			.use(authRegisterRoute)
 			.use(userRoute)
 			.use(classroomsRoute)
 			.use(classroomActivitiesRoute)
-			.use(classroomActivitySubmissionsRoute);
+			.use(classroomActivitySubmissionsRoute)
+			.get('/metrics', async ({ request, status }) => {
+				const auth = request.headers.get('authorization');
+				const expected = 'Basic ' + metricsToken;
+
+				if (auth !== expected) return status(400);
+
+				return new Response(await register.metrics(), {
+					headers: { 'Content-Type': register.contentType }
+				});
+			});
 
 		if (process.env['ENABLE_SWAGGER'] === 'true') {
 			console.log('Swagger enabled.');
