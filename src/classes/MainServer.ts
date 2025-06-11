@@ -11,8 +11,6 @@ import { classroomActivitiesRoute } from '../routes/classroom/activities';
 import { classroomActivitySubmissionsRoute } from '../routes/classroom/activities/submissions';
 import { userRoute } from '../routes/user';
 
-const metricsToken = process.env['METRICS_TOKEN']?.replace('=', '');;
-
 export class MainServer {
 	app: Elysia;
 	port: number;
@@ -33,12 +31,7 @@ export class MainServer {
 			.use(classroomsRoute)
 			.use(classroomActivitiesRoute)
 			.use(classroomActivitySubmissionsRoute)
-			.get('/metrics', async ({ request, status }) => {
-				const auth = request.headers.get('authorization')?.replace('=', '');
-				const expected = 'Basic ' + metricsToken;
-
-				if (auth !== expected) return status(400);
-
+			.get('/evogd-prom-metrics', async () => {
 				return new Response(await register.metrics(), {
 					headers: { 'Content-Type': register.contentType }
 				});
